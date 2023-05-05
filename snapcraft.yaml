@@ -1,0 +1,79 @@
+name:  pacewar
+title:  Joust 3 - Revenge Of The Lava Troll
+version: "1.6.6"
+summary:  In the distant future, two factions fight for control over space
+description: |
+  In the distant future, two factions fight for control over space. As neither side has any particular advantage over the other, it is a constant stalemate. Only absolute domination by one of the factions can end this perpetual war, and this can only be achieved by pure piloting skill. Will you be the one to end this nightmare? Pacewar is a relatively simple fighting game between two teams of space ships. A team wins the round when all ships of the other team are destroyed, and a certain number of victories more than the other player is needed to win the game. But there's a catch: as a team gets closer to winning, it loses ships, so you need to be better than the other team to succeed. Human players take over one ship at a time from their respective teams. If a human player's ship is destroyed, that human player takes over an AI ship from their team randomly. This ensures that the human players are always in the game.
+
+grade: stable
+icon: pacewar_icon.png
+
+base: core18
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: i386
+
+environment:
+  WINEDLLOVERRIDES: "$WINEDLLOVERRIDES;mscoree,mshtml="    # Prevent pop-ups about Wine Mono and Wine Gecko
+  SOMMELIER_STRICT: "1"                                    # Make Sommelier exit when unset variable is used. (useful to find bugs in sommelier)
+
+apps:
+  pacewar:
+    extensions: [ gnome-3-28 ]
+    command: bin/sommelier run-exe
+    environment:
+      RUN_EXE: "pacewar.exe"
+      #INSTALL_EXE: "$SNAP/Blockout25_setup.exe"
+      #INSTALL_FLAGS: "/S"
+    plugs:
+      - home
+      - network
+      - network-bind
+      - removable-media
+      - cups
+  # The wine command can be used to run applications inside the wine
+  # environment that this snap uses.
+  #
+  # For example, users can configure the wine environment of this snap
+  # by running `myapp.wine winecfg`.
+  wine:
+    extensions: [ gnome-3-28 ]
+    command: bin/sommelier
+    plugs:
+      - home
+      - network
+      - network-bind
+      - removable-media
+      - cups
+ # The winetricks command can be used to run winetricks inside the wine
+  # environment that this snap uses.
+  winetricks:
+    extensions: [ gnome-3-28 ]
+    command: bin/sommelier winetricks
+    plugs:
+      - network
+
+parts:
+  installer:
+    plugin: dump
+    source: ./
+
+  # The sommelier script helps you snap Windows applications using Wine. It 
+  # initializes and configures Wine and installs the Windows application.
+  sommelier:
+    plugin: make
+    source: https://github.com/snapcrafters/sommelier-core.git
+
+# These plugs are used to connect the snap to the wine runtime.
+plugs:
+  wine-runtime:
+    interface: content
+    target: $SNAP/wine-runtime
+    default-provider: wine-platform-runtime
+  wine-5-stable:
+    interface: content
+    target: $SNAP/wine-platform
+    default-provider: wine-platform-5-stable
+
